@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Login - ONDC Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Seller Login</h2>
+        <form action="/login-seller" method="POST" class="mt-4">
+            <div class="mb-3">
+                <label for="mobile" class="form-label">Mobile Number</label>
+                <input type="text" class="form-control" id="mobile" name="mobile" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="shopDetails" class="form-label">Shop Details</label>
+                <input type="text" class="form-control" id="shopDetails" name="shopDetails" required>
+            </div>
+            <div class="mb-3">
+                <label for="gst" class="form-label">GST Number</label>
+                <input type="text" class="form-control" id="gst" name="gst" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Login as Seller</button>
+        </form>
+    </div>
+</body>
+</html>

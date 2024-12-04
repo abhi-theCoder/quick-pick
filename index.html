@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONDC-Like Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #searchPopup {
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            width: 300px;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 9999;
+        }
+
+        .popup-content {
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .Delivery {
+            height: 15vh;
+            width: 5vw;
+            margin-bottom: 2vh;
+            margin-top: -5vh;
+        }
+
+        .Chat {
+            height: 13vh;
+            width: 4vw;
+            margin-top: -4vh;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="logo.png" alt="Logo" width="40" height="40" class="me-2">
+                Quick Pick
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Vendors</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="btn btn-light" id="searchIcon" onclick="openSearchPopup()">
+                            <i class="bi bi-search"></i> Search
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="searchPopup" class="popup-container">
+        <div class="popup-content">
+            <button class="close-btn" onclick="closeSearchPopup()">X</button>
+            <h4>Search Products</h4>
+            <form>
+                <div class="mb-3">
+                    <label for="productName" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="productName" placeholder="Enter product name">
+                </div>
+                <div class="mb-3">
+                    <label for="priceRange" class="form-label">Price Range</label>
+                    <input type="range" class="form-range" id="priceRange" min="0" max="1000" step="10">
+                    <p id="priceValue">Price: ₹0</p>
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            <div id="searchResults" class="mt-3" style="display: none;">
+                <h5>Available Sellers</h5>
+                <ul class="list-group" id="sellersList">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-primary text-white text-center py-5">
+        <div class="container H1">
+            <h1>Welcome to Quick Pick</h1>
+            <p>Your one-stop solution for digital commerce <br>Based on ONDC</p>
+            <a href="login.html" class="btn btn-light mt-3">Get Started</a>
+        </div>
+    </header>
+
+    <section class="container mt-5">
+
+        
+
+        <h2 class="text-center">Features</h2>
+        <div class="row mt-4">
+            <div class="col-md-4 text-center">
+                <img src="delivery-man_2830175.png" class="Delivery">
+                <h4>FAST DELIVERY</h4>
+                <p>Arrives in 30 Minutes.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <img src="chat_2187080.png" class="Chat">
+                <h4>Smart Bargaining Tool</h4>
+                <p>Empower buyers and sellers with a dynamic bargaining feature, enabling real-time price negotiations
+                    for the best deals.</p>
+
+            </div>
+            <div class="col-md-4 text-center">
+                <h4>PRICE SORTING</h4>
+                <p>Browse through an extensive collection of products according to your price.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mt-5">
+        <h2 class="text-center">Our Top Sellers</h2>
+        <div class="row mt-4">
+            <div class="col-md-4 text-center">
+                <h4>Seller 1</h4>
+                <p>Specializes in electronics and gadgets.</p>
+                <button class="btn btn-success">Active Buy</button>
+            </div>
+            <div class="col-md-4 text-center">
+                <h4>Seller 2</h4>
+                <p>Expert in fashion and accessories.</p>
+                <button class="btn btn-success">Active Buy</button>
+            </div>
+            <div class="col-md-4 text-center">
+                <h4>Seller 3</h4>
+                <p>Offers a variety of home appliances.</p>
+                <button class="btn btn-success">Active Buy</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p>&copy; 2024 ONDC Platform. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function openSearchPopup() {
+            document.getElementById("searchPopup").style.display = "block";
+        }
+
+        function closeSearchPopup() {
+            document.getElementById("searchPopup").style.display = "none";
+        }
+
+        document.getElementById('priceRange').addEventListener('input', function () {
+            document.getElementById('priceValue').textContent = "Price: ₹" + this.value;
+        });
+
+        const mockSellers = [{
+                name: "Seller A",
+                specialization: "Electronics",
+                contact: "Connect"
+            },
+            {
+                name: "Seller B",
+                specialization: "Fashion",
+                contact: "Connect"
+            },
+            {
+                name: "Seller C",
+                specialization: "Home Appliances",
+                contact: "Connect"
+            }
+        ];
+
+        document.querySelector('#searchPopup form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const searchTerm = document.getElementById('productName').value.trim();
+
+            if (searchTerm) {
+                const sellersList = document.getElementById('sellersList');
+                sellersList.innerHTML = '';
+
+                mockSellers.forEach(seller => {
+                    const listItem = document.createElement('li');
+                    listItem.className =
+                        'list-group-item d-flex justify-content-between align-items-center';
+                    listItem.innerHTML = `
+                        <div>
+                            <strong>${seller.name}</strong><br>
+                            <small>${seller.specialization}</small>
+                        </div>
+                        <button class="btn btn-primary btn-sm">${seller.contact}</button>
+                    `;
+                    sellersList.appendChild(listItem);
+                });
+
+                document.getElementById('searchResults').style.display = 'block';
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.min.js"></script>
+</body>
+
+</html>
