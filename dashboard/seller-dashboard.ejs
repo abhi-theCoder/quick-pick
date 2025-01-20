@@ -126,19 +126,7 @@ a:hover {
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
-            <% requests.forEach(request => { %>
-            <tr>
-                <td><%= request.productName %></td>
-                <td><%= request.buyerID %></td>
-                <td>₹<%= request.smartPrice %></td>
-                <td>
-                    <button onclick="updateRequest('<%= request._id %>', 'Yes')">Approve</button>
-                    <button onclick="updateRequest('<%= request._id %>', 'No')">Reject</button>
-                </td>
-            </tr>
-            <% }); %>
-        </tbody>
+        
     </table>
 
     <script>

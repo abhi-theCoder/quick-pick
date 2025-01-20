@@ -177,7 +177,7 @@ app.post('/login-seller', async (req, res) => {
             //     message: 'Invalid mobile number or password',
             // }); // Avoid exposing password issues
         }
-
+        // return res.redirect('/seller-dashboard');
         // Set session data 
         req.session.user = {
             name: user.name,
@@ -214,10 +214,10 @@ app.get('/seller-dashboard', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'seller') {
         return res.redirect('/');
     }
-
+    res.render('seller-dashboard', { user: req.session.user });
     // try {
     //     const requests = await Request.find({ sellerID: req.session.user.id });
-    //     res.render('seller-dashboard', { user: req.session.user, requests });
+    //     
     // } catch (err) {
     //     console.error(err);
     //     res.status(500).send('Error fetching requests');
