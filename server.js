@@ -4,8 +4,31 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const session = require('express-session');
-
+const http = require('http');
+const { Server } = require('socket.io');
 const app = express();  
+
+//___________________________________________________________________________________________________________
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Handle WebSocket connections
+io.on("connection", (socket) => {
+    console.log("A user connected:", socket.id);
+  
+    // Broadcast message to all users
+    socket.on("sendMessage", (message) => {
+      io.emit("receiveMessage", { id: socket.id, message });
+    });
+  
+    // Handle user disconnect
+    socket.on("disconnect", () => {
+      console.log("A user disconnected:", socket.id);
+    });
+  });
+
+//___________________________________________________________________________________________________________
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -36,13 +59,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 const User = require('./models/User');
 // Import Product model
 const Product = require('./models/Product');  
+const { Socket } = require('socket.io-client');
 // const Request = require('./models/Request');
 
 
 // Routes
-app.get('/', (req, res) => {
-    res.render('index', { user: req.session.user || null }); // Pass session user to index
-}); 
+// app.get('/', (req, res) => {
+//     res.render('index', { user: req.session.user || null }); // Pass session user to index
+// }); 
 
 // Buyer Routes
 app.get('/login/buyer', (req, res) => { 
@@ -87,7 +111,7 @@ app.post('/login-buyer', async (req, res) => {
 
         if (!user) {
             return res.send('Invalid mobile number');
-        }
+        } 
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
@@ -102,13 +126,7 @@ app.post('/login-buyer', async (req, res) => {
 
         // Fetch products only if the user is a buyer
         if (req.session.user.role === 'buyer') {
-            Product.find()
-                .then(products => {
-                    res.render('buyer-dashboard', { user: req.session.user, products: products, message: null });
-                })
-                .catch(err => {
-                    res.status(500).send("Error fetching products");
-                });
+            res.redirect('/buyer-dashboard');
         } else {
             res.redirect('/');  // For sellers, redirect to the homepage or seller dashboard
         }
@@ -207,7 +225,13 @@ app.get('/buyer-dashboard', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'buyer') {
         return res.redirect('/');
     }
-    res.render('buyer-dashboard', { user: req.session.user });
+    Product.find()
+        .then(products => {
+            res.render('buyer-dashboard', { user: req.session.user, products: products, message: null });
+        })
+        .catch(err => {
+            res.status(500).send("Error fetching products");
+        });
 });
 
 app.get('/seller-dashboard', async (req, res) => {
@@ -215,13 +239,7 @@ app.get('/seller-dashboard', async (req, res) => {
         return res.redirect('/');
     }
     res.render('seller-dashboard', { user: req.session.user });
-    // try {
-    //     const requests = await Request.find({ sellerID: req.session.user.id });
-    //     
-    // } catch (err) {
-    //     console.error(err);
-    //     res.status(500).send('Error fetching requests');
-    // }
+
 });
 
 //Add Product
@@ -248,20 +266,6 @@ app.post('/smart-buy', async (req, res) => {
         return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    // try {
-    //     const newRequest = new Request({
-    //         productName,
-    //         buyerID: req.session.user.id,
-    //         sellerID,
-    //         smartPrice
-    //     });
-
-    //     await newRequest.save();
-    //     res.json({ message: 'Smart Buy request submitted!' });
-    // } catch (err) {
-    //     console.error(err);
-    //     res.status(500).json({ message: 'Error submitting Smart Buy request' });
-    // }
 });
 
 //If the user is logged in and tries to access the index page, redirect them to their dashboard
@@ -279,6 +283,6 @@ app.get('/', (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

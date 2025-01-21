@@ -149,6 +149,7 @@
         <h1>Welcome <%= user.name %> !!</h1>
         <button id="logoutBtn" ><a href="/logout">Log out</a></button>
     </div>
+
     <% if (user && user.role === 'buyer') { %>
         <h2>Our Top Products</h2>
         <div class="products-container">
@@ -173,5 +174,43 @@
         <h2>Your Orders</h2>
         
     <% } %>
+<!-- ________________________________________________________________________ -->
+    <div class="chat-container">
+        <div id="messages" class="messages"></div>
+        <form id="chat-form">
+          <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" required />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+      <script src="/socket.io/socket.io.js"></script>
+
+
 </body>
+
+<script>
+    const socket = io();
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("message-input");
+    const messages = document.getElementById("messages");
+    
+    // Submit form to send message
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const message = input.value;
+      if (message.trim() !== "") {
+        socket.emit("sendMessage", message);
+        input.value = "";
+      }
+    });
+    
+    // Display received messages
+    socket.on("receiveMessage", ({ id, message }) => {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message");
+      messageElement.textContent = `${id}: ${message}`;
+      messages.appendChild(messageElement);
+      messages.scrollTop = messages.scrollHeight; // Auto-scroll
+    });
+    </script>
+
 </html>
