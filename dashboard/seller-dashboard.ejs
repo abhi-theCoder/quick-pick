@@ -84,10 +84,36 @@ a {
 a:hover {
     text-decoration: underline;
 }
+.chat-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#chat-form button{
+    padding: 5px;
+    width: 68px;
+    font-size: 15px;
+}
+#logoutBtn{
+    position: absolute;
+    top: -2%;
+    right: 5px;
+    background-color: #791919;
+    color: cornsilk;
+    border-radius: 2px;
+    padding: 4px;
+    text-decoration: none;
 
+    &:hover{
+        background-color: #721313d0;
+    }
+}
     </style>
 </head>
 <body>
+    <a id="logoutBtn" href="/logout">Log out</a> 
+    <br>
     <h1>Welcome to Your Dashboard</h1>
     
     <!-- Display seller's name and ID -->
@@ -97,7 +123,7 @@ a:hover {
         <div id="messages" class="messages"></div>
         <form id="chat-form">
           <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" required />
-          <button type="submit">Send</button>
+          <button type="submit" >Send</button>
         </form>
     </div>
 
@@ -141,7 +167,7 @@ a:hover {
     <!-- Add the logic here to display products -->
 
     <br>
-    <a href="/logout">Logout</a> 
+
 
     
 

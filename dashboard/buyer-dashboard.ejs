@@ -128,6 +128,17 @@
                 width: 90%;
             }
         }
+        .chat-container{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #chat-form button{
+            padding: 5px;
+            width: 68px;
+            font-size: 15px;
+        }
         #logoutBtn{
             padding: 5px;
             width: 5em;
@@ -170,11 +181,10 @@
                 <p class="text-center">No products available.</p>
             <% } %>
         </div>
-
-        <h2>Your Orders</h2>
         
     <% } %>
 <!-- ________________________________________________________________________ -->
+    <h2>You can send message to any seller from here</h2>
     <div class="chat-container">
         <div id="messages" class="messages"></div>
         <form id="chat-form">
@@ -182,6 +192,8 @@
           <button type="submit">Send</button>
         </form>
       </div>
+
+      <h2>Your Orders</h2>
       <script src="/socket.io/socket.io.js"></script>
 
 
