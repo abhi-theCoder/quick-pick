@@ -156,11 +156,11 @@
     </style>
 </head>
 <body>
+    <br>
     <div style="display: flex; justify-content:center; align-items:center ">
         <h1>Welcome <%= user.name %> !!</h1>
         <button id="logoutBtn" ><a href="/logout">Log out</a></button>
     </div>
-
     <% if (user && user.role === 'buyer') { %>
         <h2>Our Top Products</h2>
         <div class="products-container">

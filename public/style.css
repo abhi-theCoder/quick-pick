@@ -2,7 +2,12 @@
 body {
     font-family: Arial, sans-serif;
 }
-
+@media (min-width: 992px) {
+    .navbar-expand-lg .navbar-nav {
+        flex-direction: row;
+        gap: 10px;
+    }
+}
 /* Animation Definitions */
 @keyframes fadeIn {
     0% {

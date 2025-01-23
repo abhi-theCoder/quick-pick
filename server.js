@@ -18,13 +18,13 @@ io.on("connection", (socket) => {
   
     // Broadcast message to all users
     socket.on("sendMessage", (message) => {
-      io.emit("receiveMessage", { id: socket.id, message });
+      io.emit("receiveMessage", { id: socket.id, message }); 
     });
   
     // Handle user disconnect
     socket.on("disconnect", () => {
-      console.log("A user disconnected:", socket.id);
-    });
+      console.log("A user disconnected:", socket.id); 
+    }); 
   });
 
 //___________________________________________________________________________________________________________
