@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            max-width: 900px;
+            margin: auto;
+            gap: 20px;
+        }
+        .cart-container {
+            flex: 2;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .summary-container {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .cart-item-info {
+            flex-grow: 1;
+            padding-left: 15px;
+        }
+        .cart-item-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .cart-item-price {
+            color: #e76f51;
+            font-weight: bold;
+        }
+        .cart-item select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn {
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-remove {
+            background-color: #e63946;
+        }
+        .btn-remove:hover {
+            background-color: #c32f38;
+        }
+        .btn-checkout {
+            background-color: #6c5ce7;
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn-checkout:hover {
+            background-color: #5a4bbd;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 16px;
+        }
+        .summary-total {
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cart-container">
+            <h2>Shopping Cart</h2>
+            
+            <% if (user && user.cart && user.cart.length > 0) { %>
+                <% user.cart.forEach(cartItem => { %>
+                    <div class="cart-item">
+                        <img src="<%= cartItem.productId.image %>" alt="<%= cartItem.productId.name %>">
+                        <div class="cart-item-info">
+                            <p class="cart-item-title"><%= cartItem.productId.name %></p>
+                            <p class="cart-item-price">₹<%= cartItem.productId.price %></p>
+                        </div>
+                        <form action="/remove-from-cart/<%= cartItem.productId._id %>" method="POST">
+                            <button type="submit" class="btn btn-remove">Remove</button>
+                        </form>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p>Your cart is empty.</p>
+            <% } %>
+        </div>
+        
+        <div class="summary-container">
+            <h3>Order Summary</h3>
+            <div class="summary-item">
+                <span>Subtotal</span>
+                <span>₹<%= user.cart.reduce((sum, item) => sum + item.productId.price, 0) %></span>
+            </div>
+            <div class="summary-item">
+                <span>Shipping Estimate</span>
+                <span>₹50</span>
+            </div>
+            <div class="summary-item">
+                <span>Tax Estimate</span>
+                <span>₹<%= (user.cart.reduce((sum, item) => sum + item.productId.price, 0) * 0.18).toFixed(2) %></span>
+            </div>
+            <div class="summary-item summary-total">
+                <span>Order Total</span>
+                <span>₹<%= (user.cart.reduce((sum, item) => sum + item.productId.price, 0) + 50 + (user.cart.reduce((sum, item) => sum + item.productId.price, 0) * 0.18)).toFixed(2) %></span>
+            </div>
+            <% if (user && user.cart && user.cart.length > 0) { %>
+                <form action="/checkout" method="POST">
+                    <button type="submit" class="btn btn-checkout">Proceed to Checkout</button>
+                </form>
+            <% } else { %>
+                <button class="btn btn-checkout" disabled>Your cart is empty</button>
+            <% } %>            
+        </div>
+    </div>
+    <a href="/buyer-dashboard"><button>Return to dashboard</button></a>
+
+</body>
+</html>

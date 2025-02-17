@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .order { border-bottom: 1px solid #ddd; padding: 10px 0; }
+        .order:last-child { border-bottom: none; }
+        .order h3 { margin: 0 0 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/buyer-dashboard"><button>Return to dashboard</button></a>
+        <h2>My Orders</h2>
+        <% if (user.orders.length === 0) { %>
+            <p>No orders placed yet.</p>
+        <% } else { %>
+            <ol>
+                <% user.orders.forEach(order => { %>
+                    <li class="order">
+                        <h3>Order on <%= new Date(order.createdAt).toLocaleDateString() %></h3>
+                        <p><strong>Address:</strong> <%= order.address.address %></p>
+                        <p><strong>City:</strong> <%= order.address.city %></p>
+                        <p><strong>State:</strong> <%= order.address.state %></p>
+                        <p><strong>Zip:</strong> <%= order.address.zip %></p>
+                        <p><strong>Payment:</strong> <%= order.paymentMethod %></p>
+                        <p><strong>Total:</strong> ₹<%= order.totalAmount %></p>
+                        <ul>
+                            <% order.items.forEach(product => { %>
+                                <li><%= product.productName %> - Quantity: <%= product.quantity %></li>
+                            <% }); %>
+                        </ul>
+                    </li>
+                <% }); %>
+            </ol>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -1,9 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const session = require('express-session');
+const nodemailer = require('nodemailer');
 const http = require('http');
 const { Server } = require('socket.io');
 const app = express();  
@@ -39,7 +41,7 @@ app.use(session({
 }));
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://abhishekkumarmahto20000:sRylm00zvReR5qAe@cluster0.4guxi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
+mongoose.connect(process.env.MONGO_URI, {
     // useNewUrlParser: true,
     // useUnifiedTopology: true
 }).then(() => {
@@ -232,6 +234,189 @@ app.get('/buyer-dashboard', (req, res) => {
         .catch(err => {
             res.status(500).send("Error fetching products");
         });
+});
+//Cart route
+app.get('/cart', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/login/buyer'); // Redirect if user is not logged in
+        }
+
+        // Fetch user and populate cart with product details
+        const user = await User.findById(req.session.user.id).populate('cart.productId');
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        res.render('cart', { user }); // Pass user to EJS template
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+});
+
+app.get("/add-to-cart/:id", async (req, res) => {
+    try {
+        let flag = true;
+        let message = "Item successfully added to the cart";
+        const productId = req.params.id;
+
+        if (!req.session.user) {
+            return res.status(401).send("User not logged in");
+        }
+
+        // Fetch product details
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).send("Product not found");
+        }
+
+        // Find the user and update cart
+        const user = await User.findById(req.session.user.id);
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        // Check if the product is already in the cart
+        const existingItem = user.cart.find(item => item.productId.toString() === productId);
+
+        if (existingItem) {
+            message='Item is already present in the cart';
+            flag=false;
+        }
+
+        // Add product to user's cart
+        if(flag){
+            user.cart.push({
+                productId: product._id,
+                productName: product.name, // Ensure productName is saved
+                price: product.price,
+                quantity: 1,
+            });
+        }
+    
+        await user.save();
+        Product.find()
+        .then(products => {
+            res.render('buyer-dashboard', { user: req.session.user, products: products, message });
+        })
+        .catch(err => {
+            res.status(500).send("Error fetching products");
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server error");
+    }
+});
+
+//Remove product from cart
+app.post('/remove-from-cart/:productId', async (req, res) => {
+    try {
+        if (!req.session.user) return res.redirect('/login/buyer');
+
+        const user = await User.findById(req.session.user.id);
+        user.cart = user.cart.filter(item => item.productId.toString() !== req.params.productId);
+        await user.save();
+
+        res.redirect('/cart');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+});
+//checkout page
+app.post('/checkout', async (req, res) => {
+    try {
+        if (!req.session.user) return res.redirect('/login/buyer');
+
+        const user = await User.findById(req.session.user.id);
+        if (user.cart.length === 0) return res.redirect('/cart');
+        res.render('checkout');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+});
+
+app.post('/place-order', async (req, res) => {
+    try {
+        const { name, address, city, state, zip, payment, email } = req.body;
+        const user = await User.findById(req.session.user.id).populate('cart.productId');
+
+        if (!user || user.cart.length === 0) {
+            return res.redirect('/cart?error=Your cart is empty');
+        }
+
+        // Store order in database (limit to last 5 orders)
+        if (!user.orders) user.orders = [];
+        user.orders.unshift({
+            items: user.cart,
+            totalAmount: user.cart.reduce((sum, item) => sum + item.productId.price, 0) + 50,
+            address: {address, city, state, zip },
+            paymentMethod: payment,
+            date: new Date()
+        });
+
+        // Keep only the last 5 orders
+        if (user.orders.length > 5) {
+            user.orders = user.orders.slice(0, 5);
+        }
+
+        user.cart = []; // Empty cart after checkout
+        await user.save();
+
+        // Send Confirmation Email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER, // Replace with your email
+                pass: process.env.EMAIL_PASS  // Replace with your app password
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Order Confirmation - Your Order has been Placed!',
+            html: `<h2>Thank you for your order, ${name}!</h2>
+                   <p>Your order has been placed successfully. Here are your order details:</p>
+                   <ul>
+                      ${user.orders[0].items.map(item => `<li>${item.productName} - ₹${item.productId.price}</li>`).join('')}
+                   </ul>
+                   <p><strong>Total Amount:</strong> ₹${user.orders[0].totalAmount}</p>
+                   <p>We will ship your order to: ${address}, ${city}, ${state} - ${zip}</p>
+                   <p>Payment Method: ${payment}</p>
+                   <p>Thank you for shopping with us!</p>`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('Email Error:', error);
+            } else {
+                console.log('Email sent:', info.response);
+            }
+        });
+
+        res.redirect('/orders?success=Order placed successfully!');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+});
+
+app.get('/orders', async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user.id);
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+        res.render('orders', { user });
+    } catch (error) {
+        console.error("Order fetching error:", error);
+        res.status(500).send("Internal Server Error");
+    }
 });
 
 app.get('/seller-dashboard', async (req, res) => {
