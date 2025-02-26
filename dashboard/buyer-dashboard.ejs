@@ -3,87 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buyer's Dashboard</title>
+    <title>Buyer Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <nav class="bg-gray-800 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-white">Buyer's Dashboard</h1>
-            <div class="hidden md:flex space-x-4">
-                <a href="/cart" class="text-white hover:bg-gray-700 px-3 py-2 rounded">View Cart</a>
-                <a href="/orders" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Your Orders</a>
-                <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Log out</a>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="w-64 bg-white shadow-lg p-6 fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Buyer Dashboard</h2>
+                <button id="close-sidebar" class="md:hidden text-gray-600 p-2">✖</button>
             </div>
-            <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                </svg>
-            </button>
-        </div>
-        <div id="mobile-menu" class="hidden md:hidden flex flex-col bg-gray-800 p-4 space-y-2">
-            <a href="/cart" class="text-white hover:bg-gray-700 px-3 py-2 rounded">View Cart</a>
-            <a href="/orders" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Your Orders</a>
-            <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Log out</a>
-        </div>
-    </nav>
-    <script>
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-        });
-    </script>
-    <div class="container mx-auto p-6">
-        <% if (user && user.role === 'buyer') { %>
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mt-6">Our Top Products</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-                <% products.forEach(product => { %>
-                    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                        <img src="<%= product.image %>" alt="<%= product.name %>" class="w-full h-48 object-cover">
-                        <div class="p-4">
-                            <h3 class="text-lg font-semibold text-gray-700"><%= product.name %></h3>
-                            <p class="text-sm text-gray-500 mt-2"><%= product.description %></p>
-                            <p class="text-xl font-bold text-red-500 mt-2">₹<%= product.price %></p>
-                            <div class="mt-4 flex justify-between">
-                                <a href="/add-to-cart/<%= product._id %>" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Add to Cart</a>
-                                <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Smart-Buy</button>
+            <ul class="space-y-4">
+                <li><a href="#" class="block p-2 bg-blue-500 text-white rounded">Dashboard</a></li>
+                <li><a href="/orders" class="block p-2 hover:bg-gray-200 rounded">My Orders</a></li>
+                <li><a href="/cart" class="block p-2 hover:bg-gray-200 rounded">Cart</a></li>
+                <li><a href="#" class="block p-2 hover:bg-gray-200 rounded">Reviews</a></li>
+                <li><a href="#" class="block p-2 hover:bg-gray-200 rounded">Settings</a></li>
+                <li><a href="/logout" class="block p-2 bg-red-500 text-white rounded">Logout</a></li>
+            </ul>
+        </nav>
+        
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto md:ml-64">
+            <!-- Top Bar -->
+            <div class="flex justify-between items-center bg-white p-4 shadow-md rounded-md mb-6">
+                <button id="menu-toggle" class="md:hidden bg-gray-200 p-2 rounded">☰</button>
+                <h2 class="text-xl font-semibold">Welcome, <%= user.name %>!</h2>
+                <div class="flex space-x-4">
+                    <button class="bg-gray-200 p-2 rounded">🔔</button>
+                    <button class="bg-gray-200 p-2 rounded">👤</button>
+                </div>
+            </div>
+            
+            <!-- Products Section -->
+            <div class="container mx-auto p-6">
+                <h2 class="text-2xl font-semibold text-center text-gray-700 mt-6">Our Top Products</h2>
+                <div class="flex flex-wrap justify-center gap-6 mt-6">
+                    <% products.forEach(product => { %>
+                        <div class="bg-white shadow-md rounded-lg overflow-hidden w-72">
+                            <img src="<%= product.image %>" alt="<%= product.name %>" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold text-gray-700"><%= product.name %></h3>
+                                <p class="text-sm text-gray-500 mt-2"><%= product.description %></p>
+                                <p class="text-xl font-bold text-red-500 mt-2">₹<%= product.price %></p>
+                                <div class="mt-4 flex flex-col space-y-2">
+                                    <a href="/add-to-cart/<%= product._id %>" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-center">Add to Cart</a>
+                                    <button class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 w-full">Smart-Buy</button>
+                                    <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 w-full" type="submit" id="ask-ai" data-product="<%= product.name %>">Get Recommendation</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <% }); %>
+                    <% }); %>
+                </div>
             </div>
-        <% } %>
-        <h2 class="text-2xl font-semibold text-center text-gray-700 mt-8">Chat with Sellers</h2>
-        <div class="bg-white p-6 shadow-md rounded-lg mt-4 max-w-lg mx-auto">
-            <div id="messages" class="h-40 overflow-y-auto border-b border-gray-300 mb-4 p-2"></div>
-            <form id="chat-form" class="flex">
-                <input id="message-input" type="text" class="flex-grow border rounded-l-lg px-3 py-2" placeholder="Type a message..." required>
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">Send</button>
-            </form>
+            
+            <!-- Chats Section -->
+            <h2 class="text-2xl font-semibold text-center text-gray-700 mt-8">Chat with Sellers</h2>
+            <div class="bg-white p-6 shadow-md rounded-lg mt-4 max-w-lg mx-auto">
+                <div id="messages" class="h-40 overflow-y-auto border-b border-gray-300 mb-4 p-2"></div>
+                <form id="chat-form" class="flex">
+                    <input id="message-input" type="text" class="flex-grow border rounded-l-lg px-3 py-2" placeholder="Type a message..." required>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">Send</button>
+                </form>
+            </div>
         </div>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
+    
     <script>
-        const socket = io();
-        const form = document.getElementById("chat-form");
-        const input = document.getElementById("message-input");
-        const messages = document.getElementById("messages");
-        
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const message = input.value.trim();
-            if (message !== "") {
-                socket.emit("sendMessage", message);
-                input.value = "";
-            }
+        // Sidebar toggle for mobile
+        document.getElementById("menu-toggle").addEventListener("click", function() {
+            document.getElementById("sidebar").classList.toggle("-translate-x-full");
         });
-        
-        socket.on("receiveMessage", ({ id, message }) => {
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("p-2", "bg-gray-200", "rounded-md", "mb-2");
-            messageElement.textContent = `${id}: ${message}`;
-            messages.appendChild(messageElement);
-            messages.scrollTop = messages.scrollHeight;
+        document.getElementById("close-sidebar").addEventListener("click", function() {
+            document.getElementById("sidebar").classList.add("-translate-x-full");
         });
+    
+        // Attach event listeners to all "Ask AI" buttons
+        document.querySelectorAll("[id='ask-ai']").forEach(button => {
+            button.addEventListener("click", function () {
+                let productName = this.getAttribute("data-product");
+                sendProduct(productName);
+            });
+        });
+    
+        function sendProduct(productName) {
+            const today = new Date();
+            const formattedDate = today.toISOString().split("T")[0]; // Get today's date (YYYY-MM-DD)
+        
+            const requestData = {
+                prompt: `Today's date is ${formattedDate}. 
+                I want to buy a ${productName}. Should I buy it now or wait?
+                - If it's the right time to buy, reply with: 'Buy now' and 1-2 reasons (e.g., demand, price drop, or seasonal factors).
+                - If waiting is better, reply with: 'Wait X months' and 1-2 reasons (e.g., upcoming discounts, new models, or festival offers).
+                - Your recommendation must be based on real-world timing (festivals, seasons, or sales events).
+                - Example: 'Wait x months. Holi sales are in March, offering discounts on electronics.'`
+            };
+        
+            fetch('http://localhost:3000/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                alert(`AI Recommendation for ${productName}:\n\n` + data.reply);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
     </script>
+    
 </body>
 </html>

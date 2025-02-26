@@ -8,6 +8,7 @@ const session = require('express-session');
 const nodemailer = require('nodemailer');
 const http = require('http');
 const { Server } = require('socket.io');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const app = express();  
 
 //___________________________________________________________________________________________________________
@@ -53,7 +54,7 @@ app.set('view engine', 'ejs');
 
 // Set views directory 
 app.set('views', path.join(__dirname, 'dashboard'));
- 
+app.use(express.json());
 // Static files
 app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -199,12 +200,13 @@ app.post('/login-seller', async (req, res) => {
         }
         // return res.redirect('/seller-dashboard');
         // Set session data 
+        
         req.session.user = {
             name: user.name,
             role: user.role,
             id: user._id,
         };
-
+       
         // Redirect to seller dashboard
         return res.redirect('/seller-dashboard');
     } catch (err) {
@@ -215,6 +217,21 @@ app.post('/login-seller', async (req, res) => {
     } 
 });
 
+// Dashboard Routes
+// Seller Dashboard
+app.get('/seller-dashboard', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'seller') {
+        return res.redirect('/');
+    }
+    try {
+        const products = await Product.find({ sellerId: req.session.user.id });
+        res.render('seller-dashboard', { user: req.session.user, products });
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).send("Error fetching products");
+    }
+});
+
 // Logout
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
@@ -222,7 +239,6 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Dashboard Routes
 app.get('/buyer-dashboard', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'buyer') {
         return res.redirect('/');
@@ -419,28 +435,22 @@ app.get('/orders', async (req, res) => {
     }
 });
 
-app.get('/seller-dashboard', async (req, res) => {
+// Add Product Route
+app.post('/add-product', async (req, res) => { 
     if (!req.session.user || req.session.user.role !== 'seller') {
         return res.redirect('/');
     }
-    res.render('seller-dashboard', { user: req.session.user });
-
-});
-
-//Add Product
-app.post('/add-product', (req, res) => {
     const { name, description, price } = req.body;
+    const sellerId = req.session.user.id;
 
-    // Logic for saving the product to the database
-    const newProduct = new Product({
-        name,
-        description,
-        price
-    });
-
-    newProduct.save()
-        .then(() => res.redirect('/seller-dashboard'))
-        .catch((err) => res.status(500).send("Error adding product"));
+    try {
+        const newProduct = new Product({ name, description, price, sellerId });
+        await newProduct.save();
+        res.redirect('/seller-dashboard');
+    } catch (error) {
+        console.error("Error adding product:", error);
+        res.status(500).send("Error adding product");
+    }
 });
 
 //Smart-Buy
@@ -453,8 +463,57 @@ app.post('/smart-buy', async (req, res) => {
 
 });
 
+//Product Routes
+
+// Delete Product Route
+app.post('/delete-product/:id', async (req, res) => {
+    try {
+        await Product.findByIdAndDelete(req.params.id);
+        res.redirect('/seller-dashboard'); // Redirect back to seller dashboard
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error deleting product");
+    }
+});
+
+// Edit Product Route (You need an edit form page)
+app.get('/edit-product/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        res.render('edit-product', { product });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error fetching product details");
+    }
+});
+
+app.post('/edit-product/:id', async (req, res) => {
+    try {
+        const { name, description, price } = req.body;
+        await Product.findByIdAndUpdate(req.params.id, { name, description, price });
+        res.redirect('/seller-dashboard');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error updating product");
+    }
+}); 
+
+//Gemini api 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+app.post("/ask", async (req, res) => { 
+    try {
+        const { prompt } = req.body;
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        res.json({ reply: response.text() });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 //If the user is logged in and tries to access the index page, redirect them to their dashboard
-app.get('/', (req, res) => {
+app.get('/', (req, res) => { 
     if (req.session.user) {
         if (req.session.user.role === 'buyer') {
             return res.redirect('/buyer-dashboard');
